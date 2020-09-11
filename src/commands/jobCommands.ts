@@ -10,7 +10,7 @@ import * as yaml from 'js-yaml';
 import { Util } from '../commom/util';
 
 import { CliEngine, IResult } from './cliEngine';
-import { table2Console } from './utils';
+import { jobTemplate, table2Console } from './utils';
 /**
  * register job realted commands
  */
@@ -53,11 +53,12 @@ export function registerJobCommands(cli: CliEngine): void {
         { name: 'subj', help: 'submit job' },
         [
             { name: 'alias', help: 'cluster alias' },
-            { name: 'cfgfile', help: 'config file' }
+            { name: 'cfgfile', help: 'config file' },
+            { name: ['--args'], help: 'arguments for config file'}
         ],
         async (a) => {
             const client: OpenPAIClient = cli.manager.getClusterClient(a.alias);
-            const config: IJobConfig = yaml.safeLoad(fs.readFileSync(Util.expandUser(a.cfgfile), 'utf8'));
+            const config: IJobConfig = yaml.safeLoad(jobTemplate(fs.readFileSync(Util.expandUser(a.cfgfile), 'utf8'), a.args));
             return client.job.createJob(config);
         }
     );

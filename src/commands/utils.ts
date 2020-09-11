@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-extra';
+import * as nunjucks from 'nunjucks';
 import { dirname } from 'path';
 import { getBorderCharacters, table } from 'table';
 
@@ -36,4 +37,22 @@ export function table2Console(rows: any[][]): void {
     };
     const output: any = table(rows, config);
     console.log(output);
+}
+
+export function jobTemplate(file: string, args: string): string {
+    if (args == null) {
+        return file;
+    }
+    const env: any = nunjucks.configure({ autoescape: true });
+    const argsMap: {[key: string]: any; } = {};
+    const argsArray: string[] = args.split(';');
+    for (const argsPair of argsArray) {
+        const pairArray: string[] = argsPair.split(':');
+        if (pairArray.length !== 2) {
+            console.log('Arguments input error');
+        } else {
+            argsMap[pairArray[0]] = pairArray[1];
+        }
+    }
+    return env.renderString(file, argsMap);
 }
